@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -71,9 +72,11 @@ public class ArtistController {
 	}
 
 	@PutMapping("/artists/{id}/edit")
-	public String update(@Valid @ModelAttribute Artist artist, BindingResult bindingResult, @PathVariable long id, Model model) {
+	public String update(@Valid @ModelAttribute Artist artist, BindingResult bindingResult,
+			@PathVariable long id, Model model, RedirectAttributes redirAttrs) {
 
 		if (bindingResult.hasErrors()) {
+			model.addAttribute("errorMessage", "Échec de la modification de l'artiste !");
 			//Sans ceci, le lien "Annuler" n'a plus d'adresse quand le formulaire est réaffiché
 			model.addAttribute("back", "/artists/"+id);
 			return "artist/edit";
@@ -86,37 +89,44 @@ public class ArtistController {
 		}
 
 		service.updateArtist(id, artist);
+		redirAttrs.addFlashAttribute("successMessage", "Artiste modifié avec succès.");
 
 		return "redirect:/artists/"+artist.getId();
 	}
 
 	@GetMapping("/artists/create")
 	public String create(Model model) {
-		Artist artist = new Artist();
-
-		model.addAttribute("artist", artist);
+		if (!model.containsAttribute("artist")) {
+			model.addAttribute("artist", new Artist());
+		}
 
 		return "artist/create";
 	}
 
 	@PostMapping("/artists/create")
-	public String store(@Valid @ModelAttribute Artist artist, BindingResult bindingResult, Model model) {
+	public String store(@Valid @ModelAttribute Artist artist, BindingResult bindingResult,
+			Model model, RedirectAttributes redirAttrs) {
 
 		if (bindingResult.hasErrors()) {
+			model.addAttribute("errorMessage", "Échec de la création de l'artiste !");
 			return "artist/create";
 		}
 
 		service.addArtist(artist);
+		redirAttrs.addFlashAttribute("successMessage", "Artiste créé avec succès.");
 
 		return "redirect:/artists/"+artist.getId();
 	}
 
 	@DeleteMapping("/artists/{id}")
-	public String delete(@PathVariable long id, Model model) {
+	public String delete(@PathVariable long id, Model model, RedirectAttributes redirAttrs) {
 		Artist existing = service.getArtist(id);
 
 		if(existing!=null) {
 			service.deleteArtist(id);
+			redirAttrs.addFlashAttribute("successMessage", "Artiste supprimé avec succès.");
+		} else {
+			redirAttrs.addFlashAttribute("errorMessage", "Échec de la suppression de l'artiste !");
 		}
 
 		return "redirect:/artists";
