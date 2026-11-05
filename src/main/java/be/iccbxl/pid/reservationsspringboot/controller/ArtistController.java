@@ -97,14 +97,9 @@ public class ArtistController {
 		return "redirect:/artists/"+artist.getId();
 	}
 
+	@PreAuthorize("hasRole('ADMIN')")
 	@GetMapping("/artists/create")
-	public String create(Model model, HttpServletRequest request, RedirectAttributes redirAttrs) {
-		//Autorisation : seul l'administrateur peut ajouter un artiste
-		if (!request.isUserInRole("ADMIN")) {
-			redirAttrs.addFlashAttribute("errorMessage", "Vous n'avez pas le droit d'ajouter un artiste !");
-			return "redirect:/";
-		}
-
+	public String create(Model model) {
 		if (!model.containsAttribute("artist")) {
 			model.addAttribute("artist", new Artist());
 		}
@@ -112,15 +107,10 @@ public class ArtistController {
 		return "artist/create";
 	}
 
+	@PreAuthorize("hasRole('ADMIN')")
 	@PostMapping("/artists/create")
 	public String store(@Valid @ModelAttribute Artist artist, BindingResult bindingResult,
-			Model model, RedirectAttributes redirAttrs, HttpServletRequest request) {
-		//Autorisation : seul l'administrateur peut ajouter un artiste
-		if (!request.isUserInRole("ADMIN")) {
-			redirAttrs.addFlashAttribute("errorMessage", "Vous n'avez pas le droit d'ajouter un artiste !");
-			return "redirect:/";
-		}
-
+			Model model, RedirectAttributes redirAttrs) {
 
 		if (bindingResult.hasErrors()) {
 			model.addAttribute("errorMessage", "Échec de la création de l'artiste !");
@@ -133,6 +123,7 @@ public class ArtistController {
 		return "redirect:/artists/"+artist.getId();
 	}
 
+	@PreAuthorize("hasRole('ADMIN')")
 	@DeleteMapping("/artists/{id}")
 	public String delete(@PathVariable long id, Model model, RedirectAttributes redirAttrs) {
 		Artist existing = service.getArtist(id);
