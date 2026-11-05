@@ -31,18 +31,23 @@ public class SpringSecurityConfig {
 	public SecurityFilterChain configure(final HttpSecurity http) throws Exception {
 		return http.cors(Customizer.withDefaults())
 				.csrf(Customizer.withDefaults())
-				.authorizeHttpRequests(auth -> {
-					auth.requestMatchers("/admin").hasRole("ADMIN");
-					auth.requestMatchers("/user").hasRole("MEMBER");
-					auth.anyRequest().permitAll();
+				.authorizeHttpRequests(auth -> { auth
+					.requestMatchers("/").permitAll()
+					.requestMatchers("/login", "/login**", "/css/**", "/js/**",
+						"/forgot-password", "/reset-password", "/reset-success").permitAll()
+					.requestMatchers("/admin").hasRole("ADMIN")
+					.requestMatchers("/user").hasRole("MEMBER")
+					.anyRequest().authenticated();
 				})
 				.formLogin(form -> form
 					.loginPage("/login")
 					.usernameParameter("login")
-					.failureUrl("/login?loginError=true"))
+					.failureUrl("/login?loginError=true")
+					.permitAll())
 				.logout(logout -> logout
 					.logoutSuccessUrl("/login?logoutSuccess=true")
-					.deleteCookies("JSESSIONID"))
+					.deleteCookies("JSESSIONID")
+					.permitAll())
 				.exceptionHandling(exception -> exception
 					.authenticationEntryPoint(
 						new LoginUrlAuthenticationEntryPoint("/login?loginRequired=true")))
