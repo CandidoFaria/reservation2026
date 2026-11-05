@@ -51,7 +51,10 @@ public class SpringSecurityConfig {
 					.permitAll())
 				.exceptionHandling(exception -> exception
 					.authenticationEntryPoint(
-						new LoginUrlAuthenticationEntryPoint("/login?loginRequired=true")))
+						new LoginUrlAuthenticationEntryPoint("/login?loginRequired=true"))
+					//Accès refusé (rôle insuffisant) : retour à l'accueil avec un message
+					.accessDeniedHandler((request, response, accessDeniedException) ->
+						response.sendRedirect(request.getContextPath() + "/?accessDenied=true")))
 				.build();
 	}
 
