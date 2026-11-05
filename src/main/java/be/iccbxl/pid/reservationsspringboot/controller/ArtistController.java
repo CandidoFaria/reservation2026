@@ -95,7 +95,13 @@ public class ArtistController {
 	}
 
 	@GetMapping("/artists/create")
-	public String create(Model model) {
+	public String create(Model model, HttpServletRequest request, RedirectAttributes redirAttrs) {
+		//Autorisation : seul l'administrateur peut ajouter un artiste
+		if (!request.isUserInRole("ADMIN")) {
+			redirAttrs.addFlashAttribute("errorMessage", "Vous n'avez pas le droit d'ajouter un artiste !");
+			return "redirect:/";
+		}
+
 		if (!model.containsAttribute("artist")) {
 			model.addAttribute("artist", new Artist());
 		}
@@ -105,7 +111,13 @@ public class ArtistController {
 
 	@PostMapping("/artists/create")
 	public String store(@Valid @ModelAttribute Artist artist, BindingResult bindingResult,
-			Model model, RedirectAttributes redirAttrs) {
+			Model model, RedirectAttributes redirAttrs, HttpServletRequest request) {
+		//Autorisation : seul l'administrateur peut ajouter un artiste
+		if (!request.isUserInRole("ADMIN")) {
+			redirAttrs.addFlashAttribute("errorMessage", "Vous n'avez pas le droit d'ajouter un artiste !");
+			return "redirect:/";
+		}
+
 
 		if (bindingResult.hasErrors()) {
 			model.addAttribute("errorMessage", "Échec de la création de l'artiste !");
