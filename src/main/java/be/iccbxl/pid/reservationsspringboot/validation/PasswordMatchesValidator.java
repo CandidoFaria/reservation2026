@@ -23,9 +23,13 @@ public class PasswordMatchesValidator implements ConstraintValidator<PasswordMat
 			return true;
 		}
 
-		if (pwd == null || confirm == null) {
-			return false;
+		// Si les deux champs sont vides, on considère que le mot de passe n'est pas modifié => OK
+		if ((pwd == null || pwd.isBlank()) && (confirm == null || confirm.isBlank())) {
+			return true;
 		}
+
+		// Sinon, il faut qu'ils soient identiques
+		if (pwd == null) return false;
 		return pwd.equals(confirm);
 	}
 }
